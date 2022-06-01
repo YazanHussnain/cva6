@@ -700,9 +700,10 @@ module decoder import ariane_pkg::*; (
                                             instruction_o.op = ariane_pkg::CLZW;
                                         else if (instr.instr[21:20] == 2'b01)
                                             instruction_o.op = ariane_pkg::CTZW;
-                                    end else begin
+                                        else illegal_instr_bm = 1'b1;
+                                    end else if (instr.instr[31:26] == 6'b000010 )begin
                                         instruction_o.op = ariane_pkg::SLLIUW; // Shift Left Logic by Immediate (Unsigned Word)
-                                    end
+                                    end else illegal_instr_bm = 1'b1;
                                 end
                                 3'b101: begin
                                     if (instr.instr[31:25] == 7'b011_0000)
