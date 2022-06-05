@@ -120,7 +120,7 @@ module multiplier import ariane_pkg::*; (
             default:             result_o = mult_result_q[riscv::XLEN-1:0];// including MUL
         endcase
     end
-    if (ariane_pkg::BITMANIP) begin : gen_bitmanip
+    if (ariane_pkg::BITMANIP) begin
         always_ff @(posedge clk_i or negedge rst_ni) begin
             if (~rst_ni) begin
                 clmul_q       <= '0;
