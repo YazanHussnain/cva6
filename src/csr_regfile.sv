@@ -661,7 +661,7 @@ module csr_regfile import ariane_pkg::*; #(
             mstatus_d.vs = riscv::Dirty;
         end
         // hardwired extension registers
-        mstatus_d.sd   = (mstatus_q.xs == riscv::Dirty) | (mstatus_q.fs == riscv::Dirty);
+        mstatus_d.sd   = (mstatus_q.xs == riscv::Dirty) | (mstatus_q.fs == riscv::Dirty) | (mstatus_q.vs == riscv::Dirty);
 
         // write the floating point status register
         if (csr_write_fflags_i) begin
