@@ -2,14 +2,14 @@
 
 `ariane_testharness` is the module where all the masters and slaves have been connected with the axi crossbar. The following block diagram shows the connections of the slaves and masters in the `ariane_testharness` module.
 
-![ariane_testharness](diagrams/test_harness.png "ariane_testharness")
+![ariane_testharness](_static/test_harness.png "ariane_testharness")
 
 ## Ariane
 
 The `ariane` core is instantiated as `i_ariane` in `ariane_testharness` module. It is acting as a master in this `ariane_testharness`.  
 The following is the diagram of the `ariane` module along with its inputs/outputs ports.
 
-![ariane](diagrams/Test_harness_CVA6-ariane.drawio.png "ariane")
+![ariane](_static/Test_harness_CVA6-ariane.drawio.png "ariane")
 
 `Ipi`, `irq` and `time_irq` are being sent to this module from the `ariane_testharness` module.  
 The  AXI request and response signals that are being passed from the `ariane_testharness` to `ariane` module are the following:
@@ -31,7 +31,7 @@ In the `ariane_testharness` module `axi_ariane_req` and `axi_ariane_resp` struct
 `axi_adapter` is acting as a master for the debug module.  
 The following is the diagram of the `axi_adapter` module along with its signals.
 
-![axi_adapter](diagrams/Test_harness_CVA6-axi_adapter.drawio.png "axi_adapter")
+![axi_adapter](_static/Test_harness_CVA6-axi_adapter.drawio.png "axi_adapter")
 
 The AXI request and response that are being passed from the test_harness module are the following:  
 
@@ -50,17 +50,17 @@ The `dm_axi_m_req` and `dm_axi_m_resp` are being linked with the slave[1] AXI_BU
 This is the memory of debug and `axi2mem` converter is used whenever a read or write request is made to memory by the master.  
 `axi2mem` module simply waits for the ar_valid or aw_valid of the master (actual slave) interface and then passes the req_o, we_o, addr_o, be_o, user_o signals and data_o to the memory and will receive the data_i and user_i from the memory.
 
-![axi2mem](diagrams/axi2mem.png "axi2mem")
+![axi2mem](_static/axi2mem.png "axi2mem")
 
 The memory is has been instantiated in the `dm_top` module and the hierarchy is as follows:
 
-![dm_top_&_dm_mem](diagrams/Test_harness_CVA6-dm_top_for_as_slave.drawio.png "dm_top_&_dm_mem")
+![dm_top_&_dm_mem](_static/Test_harness_CVA6-dm_top_for_as_slave.drawio.png "dm_top_&_dm_mem")
 
 ## CLINT
 
 Clint is a slave in this SoC. The signals of the `clint` module are as follows:
 
-![clint](diagrams/Test_harness_CVA6-clint.drawio.png "clint")
+![clint](_static/Test_harness_CVA6-clint.drawio.png "clint")
 
 `ipi_o` (inter-processing interrupt) and `timer_irq_o` (timer_interrupt request), these are generated from the `clint` module and are the inputs of the ariane core.  
 This module interacts with the axi bus interface through the following assignments:
@@ -78,7 +78,7 @@ This compiler directive is used to assign the response of the slave in this case
 
 `axi2mem` module is used to communicate with `bootrom` module. The signals of this memory have been shown in the diagram below:
 
-![bootrom](diagrams/Test_harness_CVA6-bootrom.drawio.png "bootrom")
+![bootrom](_static/Test_harness_CVA6-bootrom.drawio.png "bootrom")
 
 Bootrom is pre-initialized with `ROM_SIZE = 186`.
 
@@ -86,7 +86,7 @@ Bootrom is pre-initialized with `ROM_SIZE = 186`.
 
 The complete sequence through which a request to SRAM is transferred is as follows:
 
-![sequence](diagrams/Test_harness_CVA6-check.drawio.png)
+![sequence](_static/Test_harness_CVA6-check.drawio.png)
 
 `dram` and `dram_delayed` are two AXI_BUS interfaces.
 The slave modport of AXI_BUS interface for `Master[DRAM]` has been linked with `axi_riscv_atomics` module and the request of the master has been passed to `dram` interface, another instantiation of interface of AXI_BUS. All this is for the exclusive accesses and no burst is supported in this exclusive access.  
@@ -94,7 +94,7 @@ The slave modport of AXI_BUS interface for `Master[DRAM]` has been linked with `
 `dram_delayed` is also passed to the `axi2mem` module as a slave modport of AXI_BUS interface. `axi2mem` module with `dram_delayed` as an AXI_Bus interface will interact with SRAM.  
 SRAM is a word addressable memory with the signals as follows:
 
-![sram](diagrams/sram.png "sram")
+![sram](_static/sram.png "sram")
 
 ## GPIO
 
@@ -106,7 +106,7 @@ There are two signals for the `apb_uart` module in the `ariane_testharness` name
 `axi2apb_64_32`, module has been used to convert the axi protocol five channel signals to a single channel apb signals. The `axi2apb_64_32` module has been used between AXI_BUS and `apb_uart module`.  
 The signals of the `apb_uart` module have been shown in the diagram below:
 
-![apb_uart](diagrams/Test_harness_CVA6-apb_uart.drawio.png "apb_uart")
+![apb_uart](_static/Test_harness_CVA6-apb_uart.drawio.png "apb_uart")
 
 Only the signals related to the test_harness have been shown in the above diagram.
 
@@ -114,19 +114,19 @@ Only the signals related to the test_harness have been shown in the above diagra
 
 PLIC is a slave in this SoC. The hiearchy through which the request is propagated to the plic_top module is as follows:
 
-![plic_hierarchy](diagrams/plic_checked.png )
+![plic_hierarchy](_static/plic_checked.png )
 
 `axi2apb_64_32` has been used to convert all the plic axi signals into apb signals.  
 apb_to_reg is used to assign the apb signals to the `reg_bus` interface which basically communicates with the `plic_top` module. In `apb_to_reg` module ,the logical `AND` of `psel` and `penable` signals of apb makes the `valid` signal of `reg_bus` interface.  
 The signals of the `plic_top` have been shown below:
 
-![plic_top](diagrams/Test_harness_CVA6-plic_top.drawio.png "plic_top")
+![plic_top](_static/Test_harness_CVA6-plic_top.drawio.png "plic_top")
 
 ## Timer
 
 The `axi2apb_64_32` module has been used to convert all the timer axi signals into  timer apb signals.The diagram of the apb_timer is as follows.
 
-![apb_timer](diagrams/Test_harness_CVA6-timer.drawio.png "apb_timer")
+![apb_timer](_static/Test_harness_CVA6-timer.drawio.png "apb_timer")
 
 The signals of apb protocol have been shown in the form of `apb_timer_req` and `apb_timer_resp` in the above diagram.
 
