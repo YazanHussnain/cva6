@@ -352,7 +352,13 @@ module ex_stage import ariane_pkg::*; #(
         .mem_paddr_o,
         .lsu_rmask_o,
         .lsu_wmask_o,
-        .lsu_addr_trans_id_o
+        .lsu_addr_trans_id_o,
+        .x_mmu_req_i            (cvxif_resp_i.x_mmu_req),
+        .x_vaddr_i              (cvxif_resp_i.x_mmu_vaddr),
+        .x_is_store_i           (cvxif_resp_i.x_is_store),
+        .x_mmu_valid_o          (cvxif_req_o.x_mmu_valid),
+        .x_paddr_o              (cvxif_req_o.x_mmu_paddr),
+        .x_exception_o          (cvxif_req_o.x_mmu_exception)
     );
 
     if (CVXIF_PRESENT) begin : gen_cvxif
