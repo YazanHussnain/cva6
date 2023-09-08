@@ -83,8 +83,8 @@ module issue_read_operands import ariane_pkg::*; #(
 );
     logic stall;
     logic fu_busy; // functional unit is busy
-    riscv::xlen_t    operand_a_regfile, operand_b_regfile;  // operands coming from regfile
-    rs3_len_t operand_c_regfile; // third operand from fp regfile or gp regfile if NR_RGPR_PORTS == 3
+    riscv::xlen_t    operand_a_regfile, operand_b_regfile, operand_c_regfile;  // operands coming from regfile
+    //rs3_len_t operand_c_regfile; // third operand from fp regfile or gp regfile if NR_RGPR_PORTS == 3
     // output flipflop (ID <-> EX)
     riscv::xlen_t operand_a_n, operand_a_q,
                  operand_b_n, operand_b_q,
@@ -222,7 +222,7 @@ module issue_read_operands import ariane_pkg::*; #(
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} :
                                                     issue_instr_i.op == OFFLOAD ? operand_c_regfile : issue_instr_i.result;
         end else begin
-            imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} : issue_instr_i.result;
+            imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {/*{riscv::XLEN-CVA6Cfg.FLen{1'b0}},*/ operand_c_regfile} : issue_instr_i.result;
         end
         trans_id_n = issue_instr_i.trans_id;
         fu_n       = issue_instr_i.fu;
@@ -499,7 +499,7 @@ module issue_read_operands import ariane_pkg::*; #(
     assign operand_a_regfile = is_rs1_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, fprdata[0]} : rdata[0];
     assign operand_b_regfile = is_rs2_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, fprdata[1]} : rdata[1];
     assign operand_c_regfile = CVA6Cfg.NrRgprPorts == 3 ? (is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, fprdata[2]} : rdata[2])
-                                                  : fprdata[2];
+                                                    : {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, fprdata[2]} ;
 
     // ----------------------
     // Registers (ID <-> EX)
