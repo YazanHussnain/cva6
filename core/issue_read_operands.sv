@@ -220,7 +220,8 @@ module issue_read_operands import ariane_pkg::*; #(
         // for FP operations, the imm field can also be the third operand from the regfile
         if (CVA6Cfg.NrRgprPorts == 3) begin
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} :
-                                                    issue_instr_i.op == OFFLOAD ? operand_c_regfile : issue_instr_i.result;
+                                                    issue_instr_i.op == OFFLOAD ? {{(riscv::XLEN-$bits(operand_c_regfile)){1'b0}},operand_c_regfile} : issue_instr_i.result;
+
         end else begin
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} : issue_instr_i.result;
         end
@@ -237,7 +238,7 @@ module issue_read_operands import ariane_pkg::*; #(
         end
 
         if (forward_rs3) begin
-            imm_n  = CVA6Cfg.NrRgprPorts == 3 ? rs3_i : {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, rs3_i};;
+            imm_n  = CVA6Cfg.NrRgprPorts == 3 ? {{(riscv::XLEN-$bits(rs3_i)){1'b0}},rs3_i} : {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, rs3_i};;
         end
 
         // use the PC as operand a

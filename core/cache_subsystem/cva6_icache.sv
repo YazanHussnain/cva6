@@ -166,7 +166,7 @@ end else begin : gen_piton_offset
 // main control logic
 ///////////////////////////////////////////////////////
   logic addr_ni;
-  assign addr_ni = is_inside_nonidempotent_regions(ArianeCfg, areq_i.fetch_paddr);
+  assign addr_ni = is_inside_nonidempotent_regions(ArianeCfg, {{64-$bits(areq_i.fetch_paddr){1'b0}},areq_i.fetch_paddr});
   always_comb begin : p_fsm
     // default assignment
     state_d      = state_q;
