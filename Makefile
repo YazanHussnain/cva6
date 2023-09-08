@@ -541,7 +541,6 @@ verilate_command := $(verilator) verilator_config.vlt                           
                     -Wno-ASSIGNDLY                                                                               \
                     -Wno-DECLFILENAME                                                                            \
                     -Wno-UNUSED                                                                                  \
-                    -Wno-UNOPTFLAT                                                                               \
                     -Wno-BLKANDNBLK                                                                              \
                     -Wno-style                                                                                   \
                     $(if ($(PRELOAD)!=""), -DPRELOAD=1,)                                                         \
