@@ -62,11 +62,11 @@ module mock_uart (
             if (psel_i & penable_i & pwrite_i) begin
                 case ((paddr_i >> 'h2) & 'h7)
                     THR: begin
-                        if (lcr & 'h80) dll <= byte'(pwdata_i[7:0]);
+                        if (&(lcr & 'h80)) dll <= byte'(pwdata_i[7:0]);
                         else uart_tx(byte'(pwdata_i[7:0]));
                     end
                     IER: begin
-                        if (lcr & 'h80) dlm <= byte'(pwdata_i[7:0]);
+                        if (&(lcr & 'h80)) dlm <= byte'(pwdata_i[7:0]);
                         else ier <= byte'(pwdata_i[7:0] & 'hF);
                     end
                     FCR: begin
@@ -89,10 +89,10 @@ module mock_uart (
         if (psel_i & penable_i & ~pwrite_i) begin
             case ((paddr_i >> 'h2) & 'h7)
                 THR: begin
-                    if (lcr & 'h80) prdata_o = {24'b0, dll};
+                    if (&(lcr & 'h80)) prdata_o = {24'b0, dll};
                 end
                 IER: begin
-                    if (lcr & 'h80) prdata_o = {24'b0, dlm};
+                    if (&(lcr & 'h80)) prdata_o = {24'b0, dlm};
                     else prdata_o = {24'b0, ier};
                 end
                 IIR: begin
@@ -101,7 +101,7 @@ module mock_uart (
                 end
                 LCR: prdata_o = {24'b0, lcr};
                 MCR: prdata_o = {24'b0, mcr};
-                LSR: prdata_o = {24'b0, (lsr | (1 << THRE) | (1 << TEMT))};
+                LSR: prdata_o = {24'b0, (lsr | (8'b00000001 << THRE) | (8'b00000001 << TEMT))};
                 MSR: prdata_o = {24'b0, msr};
                 SCR: prdata_o = {24'b0, scr};
                 default:;
