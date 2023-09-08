@@ -190,36 +190,17 @@ module wt_dcache_wbuffer import ariane_pkg::*; import wt_cache_pkg::*; #(
   assign miss_size_o = riscv::IS_XLEN64 ? toSize64(bdirty[dirty_ptr]):
                                           toSize32(bdirty[dirty_ptr]);
 
-  // replicate transfers shorter than a dword
-    /*
-  always_comb begin
-    if (riscv::IS_XLEN64)
-        miss_wdata_o = repData64(wbuffer_dirty_mux.data, bdirty_off, miss_size_o[1:0]);
-    else 
-        miss_wdata_o = repData32(wbuffer_dirty_mux.data, bdirty_off, miss_size_o[1:0]);
-  end*/                           
+  // replicate transfers shorter than a dword                           
   assign miss_wdata_o = riscv::IS_XLEN64 ? repData64(wbuffer_dirty_mux.data, bdirty_off, miss_size_o[1:0]):
                                            repData32(wbuffer_dirty_mux.data, bdirty_off, miss_size_o[1:0]); 
                                            
   if (ariane_pkg::DATA_USER_EN) begin
-    /*
-    if (riscv::IS_XLEN64)
-      assign  miss_wuser_o = repData64(wbuffer_dirty_mux.user, bdirty_off, miss_size_o[1:0]);
-    else 
-      assign  miss_wuser_o = repData32(wbuffer_dirty_mux.user, bdirty_off, miss_size_o[1:0]);
-    */
     assign miss_wuser_o = riscv::IS_XLEN64 ? repData64(wbuffer_dirty_mux.user, bdirty_off, miss_size_o[1:0]):
                                              repData32(wbuffer_dirty_mux.user, bdirty_off, miss_size_o[1:0]);                                      
   end else begin
     assign miss_wuser_o = '0;
   end
 
-  /*
-  if (riscv::IS_XLEN64)
-      assign  tx_be = to_byte_enable8(bdirty_off, miss_size_o[1:0]);
-  else 
-      assign  tx_be = to_byte_enable4(bdirty_off, miss_size_o[1:0]);
-  */
   assign tx_be        = riscv::IS_XLEN64 ? to_byte_enable8(bdirty_off, miss_size_o[1:0]):
                                            to_byte_enable4(bdirty_off, miss_size_o[1:0]);
 

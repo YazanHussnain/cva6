@@ -222,7 +222,7 @@ module issue_read_operands import ariane_pkg::*; #(
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} :
                                                     issue_instr_i.op == OFFLOAD ? operand_c_regfile : issue_instr_i.result;
         end else begin
-            imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {/*{riscv::XLEN-CVA6Cfg.FLen{1'b0}},*/ operand_c_regfile} : issue_instr_i.result;
+            imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {operand_c_regfile} : issue_instr_i.result;
         end
         trans_id_n = issue_instr_i.trans_id;
         fu_n       = issue_instr_i.fu;
