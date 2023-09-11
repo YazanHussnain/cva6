@@ -213,7 +213,7 @@ module scoreboard #(
   end
 
   // FIFO counter updates
-  assign num_commit = (CVA6Cfg.NrCommitPorts == 2) ? commit_ack_i[1] + commit_ack_i[0] : commit_ack_i[0];
+  assign num_commit = (CVA6Cfg.NrCommitPorts == 2) ? commit_ack_i[CVA6Cfg.NrCommitPorts-1] + commit_ack_i[0] : commit_ack_i[0];
 
   assign issue_cnt_n         = (flush_i) ? '0 : issue_cnt_q         - num_commit + issue_en;
   assign commit_pointer_n[0] = (flush_i) ? '0 : commit_pointer_q[0] + num_commit;
@@ -419,7 +419,7 @@ module scoreboard #(
     else $fatal (1,"Commit acknowledged but instruction is not valid");
 
   assert property (
-    @(posedge clk_i) disable iff (!rst_ni) commit_ack_i[1] |-> commit_instr_o[1].valid)
+    @(posedge clk_i) disable iff (!rst_ni) commit_ack_i[(CVA6Cfg.NrCommitPorts == 1) ? 0 : 1] |-> commit_instr_o[(CVA6Cfg.NrCommitPorts == 1) ? 0 : 1].valid)
     else $fatal (1,"Commit acknowledged but instruction is not valid");
 
   // assert that we never give an issue ack signal if the instruction is not valid
