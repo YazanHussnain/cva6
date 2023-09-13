@@ -280,7 +280,7 @@ module alu import ariane_pkg::*; #(
                 BSET, BSETI: result_o = fu_data_i.operand_a | bit_indx;
 
                 // Count Leading/Trailing Zeros
-                CLZ, CTZ  :  result_o = (lz_tz_empty) ? (lz_tz_count + 1) : lz_tz_count;
+                CLZ, CTZ  :  result_o = (lz_tz_empty) ? ({{(riscv::XLEN-$clog2(riscv::XLEN)){1'b0}},lz_tz_count} + 1) : ({{(riscv::XLEN-$clog2(riscv::XLEN)){1'b0}},lz_tz_count});
                 CLZW, CTZW:  result_o = (lz_tz_wempty) ? 32 : {{riscv::XLEN-5{1'b0}}, lz_tz_wcount};
 
                 // Count population

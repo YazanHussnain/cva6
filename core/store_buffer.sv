@@ -78,7 +78,7 @@ module store_buffer import ariane_pkg::*; #(
         speculative_status_cnt = speculative_status_cnt_q;
 
         // we are ready if the speculative and the commit queue have a space left
-        ready_o = (speculative_status_cnt_q < (DEPTH_SPEC - 1)) || commit_i;
+        ready_o = ({{29{1'b0}},speculative_status_cnt_q} < (DEPTH_SPEC - 1)) || commit_i;
         // default assignments
         speculative_status_cnt_n    = speculative_status_cnt_q;
         speculative_read_pointer_n  = speculative_read_pointer_q;
@@ -149,7 +149,7 @@ module store_buffer import ariane_pkg::*; #(
         automatic logic [$clog2(DEPTH_COMMIT):0] commit_status_cnt;
         commit_status_cnt = commit_status_cnt_q;
 
-        commit_ready_o = (commit_status_cnt_q < DEPTH_COMMIT);
+        commit_ready_o = ({{29{1'b0}},commit_status_cnt_q}  < DEPTH_COMMIT);
         // no store is pending if we don't have any element in the commit queue e.g.: it is empty
         no_st_pending_o         = (commit_status_cnt_q == 0);
         // default assignments
@@ -268,7 +268,7 @@ module store_buffer import ariane_pkg::*; #(
         else $error ("[Commit Queue] You are trying to commit and flush in the same cycle");
 
     speculative_buffer_overflow: assert property (
-        @(posedge clk_i) rst_ni && (speculative_status_cnt_q == DEPTH_SPEC) |-> !valid_i)
+        @(posedge clk_i) rst_ni && ({{29{1'b0}},speculative_status_cnt_q} == DEPTH_SPEC) |-> !valid_i)
         else $error ("[Speculative Queue] You are trying to push new data although the buffer is not ready");
 
     speculative_buffer_underflow: assert property (
@@ -276,7 +276,7 @@ module store_buffer import ariane_pkg::*; #(
         else $error ("[Speculative Queue] You are committing although there are no stores to commit");
 
     commit_buffer_overflow: assert property (
-        @(posedge clk_i) rst_ni && (commit_status_cnt_q == DEPTH_COMMIT) |-> !commit_i)
+        @(posedge clk_i) rst_ni && ({{29{1'b0}},commit_status_cnt_q} == DEPTH_COMMIT) |-> !commit_i)
         else $error("[Commit Queue] You are trying to commit a store although the buffer is full");
     //pragma translate_on
 endmodule
