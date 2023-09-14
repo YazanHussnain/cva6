@@ -48,15 +48,15 @@ module pmp_entry #(
                 size = '0;
                 // check that the requested address is in between the two
                 // configuration addresses
-                if (addr_i >= (conf_addr_prev_i << 2) && addr_i < (conf_addr_i << 2)) begin
+                if (addr_i >= ({{PLEN-PMP_LEN{1'b0}},conf_addr_prev_i} << 2) && addr_i < ({{PLEN-PMP_LEN{1'b0}},conf_addr_i} << 2)) begin
                     match_o = 1'b1;
                 end else match_o = 1'b0;
 
                 // synthesis translate_off
                 if (match_o == 0) begin
-                    assert(addr_i >= (conf_addr_i << 2) || addr_i < (conf_addr_prev_i << 2));
+                    assert(addr_i >= ({{PLEN-PMP_LEN{1'b0}},conf_addr_i} << 2) || addr_i < ({{PLEN-PMP_LEN{1'b0}},conf_addr_prev_i} << 2));
                 end else begin
-                    assert(addr_i < (conf_addr_i << 2) && addr_i >= (conf_addr_prev_i << 2));
+                    assert(addr_i < ({{PLEN-PMP_LEN{1'b0}},conf_addr_i} << 2) && addr_i >= ({{PLEN-PMP_LEN{1'b0}},conf_addr_prev_i} << 2));
                 end
                 // synthesis translate_on
 
@@ -66,11 +66,11 @@ module pmp_entry #(
                 if (conf_addr_mode_i == riscv::NA4) size = 2;
                 else begin
                     // use the extracted trailing ones
-                    size = trail_ones+3;
+                    size = {{26{1'b0}},trail_ones}+3;
                 end
 
                 mask = '1 << size;
-                base = (conf_addr_i << 2) & mask;
+                base = ({{PLEN-PMP_LEN{1'b0}},conf_addr_i} << 2) & mask;
                 match_o = (addr_i & mask) == base ? 1'b1 : 1'b0;
 
                 // synthesis translate_off
