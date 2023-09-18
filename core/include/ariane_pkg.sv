@@ -32,14 +32,14 @@ package ariane_pkg;
       int                               BHTEntries;
       // PMAs
       int unsigned                      NrNonIdempotentRules;  // Number of non idempotent rules
-      logic [NrMaxRules-1:0][63:0]      NonIdempotentAddrBase; // base which needs to match
-      logic [NrMaxRules-1:0][63:0]      NonIdempotentLength;   // bit mask which bits to consider when matching the rule
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      NonIdempotentAddrBase; // base which needs to match
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      NonIdempotentLength;   // bit mask which bits to consider when matching the rule
       int unsigned                      NrExecuteRegionRules;  // Number of regions which have execute property
-      logic [NrMaxRules-1:0][63:0]      ExecuteRegionAddrBase; // base which needs to match
-      logic [NrMaxRules-1:0][63:0]      ExecuteRegionLength;   // bit mask which bits to consider when matching the rule
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      ExecuteRegionAddrBase; // base which needs to match
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      ExecuteRegionLength;   // bit mask which bits to consider when matching the rule
       int unsigned                      NrCachedRegionRules;   // Number of regions which have cached property
-      logic [NrMaxRules-1:0][63:0]      CachedRegionAddrBase;  // base which needs to match
-      logic [NrMaxRules-1:0][63:0]      CachedRegionLength;    // bit mask which bits to consider when matching the rule
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      CachedRegionAddrBase;  // base which needs to match
+      logic [NrMaxRules-1:0][riscv::XLEN-1:0]      CachedRegionLength;    // bit mask which bits to consider when matching the rule
       // cache config
       bit                               AxiCompliant;          // set to 1 when using in conjunction with 64bit AXI bus adapter
       bit                               SwapEndianess;         // set to 1 to swap endianess inside L1.5 openpiton adapter
@@ -54,16 +54,16 @@ package ariane_pkg;
       BHTEntries: int'(cva6_config_pkg::CVA6ConfigBHTEntries),
       // idempotent region
       NrNonIdempotentRules:  unsigned'(2),
-      NonIdempotentAddrBase: 1024'({64'b0, 64'b0}),
-      NonIdempotentLength:   1024'({64'b0, 64'b0}),
+      NonIdempotentAddrBase: (16*riscv::XLEN)'({{riscv::XLEN{1'b0}}, {riscv::XLEN{1'b0}}}),
+      NonIdempotentLength:   (16*riscv::XLEN)'({{riscv::XLEN{1'b0}}, {riscv::XLEN{1'b0}}}),
       NrExecuteRegionRules:  unsigned'(3),
       //                      DRAM,          Boot ROM,   Debug Module
-      ExecuteRegionAddrBase: 1024'({64'h8000_0000, 64'h1_0000, 64'h0}),
-      ExecuteRegionLength:   1024'({64'h40000000,  64'h10000,  64'h1000}),
+      ExecuteRegionAddrBase: (16*riscv::XLEN)'({{32'h8000_0000,{riscv::XLEN-32{1'b0}}}, {32'h1_0000,{riscv::XLEN-32{1'b0}}}, {riscv::XLEN{1'b0}}}),
+      ExecuteRegionLength:   (16*riscv::XLEN)'({{32'h40000000,{riscv::XLEN-32{1'b0}}},  {32'h10000,{riscv::XLEN-32{1'b0}}},  {32'h1000,{riscv::XLEN-32{1'b0}}}}),
       // cached region
       NrCachedRegionRules:   unsigned'(1),
-      CachedRegionAddrBase:  1024'({64'h8000_0000}),
-      CachedRegionLength:    1024'({64'h40000000}),
+      CachedRegionAddrBase:  (16*riscv::XLEN)'({32'h8000_0000,{riscv::XLEN-32{1'b0}}}),
+      CachedRegionLength:    (16*riscv::XLEN)'({32'h40000000, {riscv::XLEN-32{1'b0}}}),
       //  cache config
       AxiCompliant:           1'b1,
       SwapEndianess:          1'b0,
@@ -87,13 +87,13 @@ package ariane_pkg;
       // pragma translate_on
     endfunction
 
-    function automatic logic range_check(logic[63:0] base, logic[63:0] len, logic[63:0] address);
+    function automatic logic range_check(logic[riscv::XLEN-1:0] base, logic[riscv::XLEN-1:0] len, logic[riscv::XLEN-1:0] address);
       // if len is a power of two, and base is properly aligned, this check could be simplified
       // Extend base by one bit to prevent an overflow.
-      return (address >= base) && (({1'b0, address}) < (65'(base)+len));
+      return (address >= base) && (({1'b0, address}) < ((riscv::XLEN+1)'(base)+len));
     endfunction : range_check
 
-    function automatic logic is_inside_nonidempotent_regions (ariane_cfg_t Cfg, logic[63:0] address);
+    function automatic logic is_inside_nonidempotent_regions (ariane_cfg_t Cfg, logic[riscv::XLEN-1:0] address);
       logic[NrMaxRules-1:0] pass;
       pass = '0;
       for (int unsigned k = 0; k < Cfg.NrNonIdempotentRules; k++) begin
@@ -102,7 +102,7 @@ package ariane_pkg;
       return |pass;
     endfunction : is_inside_nonidempotent_regions
 
-    function automatic logic is_inside_execute_regions (ariane_cfg_t Cfg, logic[63:0] address);
+    function automatic logic is_inside_execute_regions (ariane_cfg_t Cfg, logic[riscv::XLEN-1:0] address);
       // if we don't specify any region we assume everything is accessible
       logic[NrMaxRules-1:0] pass;
       pass = '0;
@@ -112,7 +112,7 @@ package ariane_pkg;
       return |pass;
     endfunction : is_inside_execute_regions
 
-    function automatic logic is_inside_cacheable_regions (ariane_cfg_t Cfg, logic[63:0] address);
+    function automatic logic is_inside_cacheable_regions (ariane_cfg_t Cfg, logic[riscv::XLEN-1:0] address);
       automatic logic[NrMaxRules-1:0] pass;
       pass = '0;
       for (int unsigned k = 0; k < Cfg.NrCachedRegionRules; k++) begin
@@ -828,19 +828,19 @@ package ariane_pkg;
     // LSU Functions
     // ----------------------
     // align data to address e.g.: shift data to be naturally 64
-    function automatic riscv::xlen_t data_align (logic [2:0] addr, logic [63:0] data);
+    function automatic riscv::xlen_t data_align (logic [2:0] addr, logic [riscv::XLEN-1:0] data);
         // Set addr[2] to 1'b0 when 32bits
         logic [2:0] addr_tmp = {(addr[2] && riscv::IS_XLEN64), addr[1:0]};
-        logic [63:0] data_tmp = {64{1'b0}};
+        logic [riscv::XLEN-1:0] data_tmp = {riscv::XLEN{1'b0}};
         case (addr_tmp)
             3'b000: data_tmp[riscv::XLEN-1:0] = {data[riscv::XLEN-1:0]};
             3'b001: data_tmp[riscv::XLEN-1:0] = {data[riscv::XLEN-9:0],  data[riscv::XLEN-1:riscv::XLEN-8]};
             3'b010: data_tmp[riscv::XLEN-1:0] = {data[riscv::XLEN-17:0], data[riscv::XLEN-1:riscv::XLEN-16]};
             3'b011: data_tmp[riscv::XLEN-1:0] = {data[riscv::XLEN-25:0], data[riscv::XLEN-1:riscv::XLEN-24]};
-            3'b100: data_tmp = {data[31:0], data[63:32]};
-            3'b101: data_tmp = {data[23:0], data[63:24]};
-            3'b110: data_tmp = {data[15:0], data[63:16]};
-            3'b111: data_tmp = {data[7:0],  data[63:8]};
+            3'b100: data_tmp = {data[riscv::XLEN/2-1:0], data[riscv::XLEN-1:riscv::XLEN/2]};
+            3'b101: data_tmp = {data[23:0], data[riscv::XLEN-1:24]};
+            3'b110: data_tmp = {data[15:0], data[riscv::XLEN-1:16]};
+            3'b111: data_tmp = {data[7:0],  data[riscv::XLEN-1:8]};
         endcase
         return data_tmp[riscv::XLEN-1:0];
     endfunction
