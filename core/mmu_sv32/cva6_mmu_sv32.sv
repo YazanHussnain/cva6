@@ -338,7 +338,7 @@ module cva6_mmu_sv32 import ariane_pkg::*; #(
     end
 
     // check for execute flag on memory
-    assign match_any_execute_region = ariane_pkg::is_inside_execute_regions(ArianeCfg, {{64-riscv::PLEN{1'b0}}, icache_areq_o.fetch_paddr});
+    assign match_any_execute_region = ariane_pkg::is_inside_execute_regions(ArianeCfg, icache_areq_o.fetch_paddr);
 
     // Instruction fetch
     pmp #(
@@ -390,7 +390,7 @@ module cva6_mmu_sv32 import ariane_pkg::*; #(
             lsu_dtlb_ppn_o        = {{riscv::PLEN-riscv::VLEN{1'b0}},lsu_vaddr_n[riscv::VLEN-1:12]};
         end else begin
             lsu_paddr_o           = lsu_vaddr_q[riscv::PLEN-1:0];
-            lsu_dtlb_ppn_o        = lsu_vaddr_n[riscv::VLEN-1:12];
+            lsu_dtlb_ppn_o        = lsu_vaddr_n[riscv::PPNW-1:0]; // changing as per TL
         end
         lsu_valid_o           = lsu_req_q;
         lsu_exception_o       = misaligned_ex_q;

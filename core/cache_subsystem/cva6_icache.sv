@@ -118,7 +118,7 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
   assign cl_tag_d  = (areq_i.fetch_valid) ? areq_i.fetch_paddr[ICACHE_TAG_WIDTH+ICACHE_INDEX_WIDTH-1:ICACHE_INDEX_WIDTH] : cl_tag_q;
 
   // noncacheable if request goes to I/O space, or if cache is disabled
-  assign paddr_is_nc = (~cache_en_q) | (~ariane_pkg::is_inside_cacheable_regions(ArianeCfg, {{{64-riscv::PLEN}{1'b0}}, cl_tag_d, {ICACHE_INDEX_WIDTH{1'b0}}}));
+  assign paddr_is_nc = (~cache_en_q) | (~ariane_pkg::is_inside_cacheable_regions(ArianeCfg, {cl_tag_d, {ICACHE_INDEX_WIDTH{1'b0}}}));
 
   // pass exception through
   assign dreq_o.ex = areq_i.fetch_exception;
@@ -134,8 +134,8 @@ module cva6_icache import ariane_pkg::*; import wt_cache_pkg::*; #(
 
   if (ArianeCfg.AxiCompliant) begin : gen_axi_offset
     // if we generate a noncacheable access, the word will be at offset 0 or 4 in the cl coming from memory
-    assign cl_offset_d = ( dreq_o.ready & dreq_i.req)      ? {dreq_i.vaddr>>2, 2'b0} :
-                         ( paddr_is_nc  & mem_data_req_o ) ? cl_offset_q[2]<<2 : // needed since we transfer 32bit over a 64bit AXI bus in this case
+    assign cl_offset_d = ( dreq_o.ready & dreq_i.req)      ? {dreq_i.vaddr[ICACHE_OFFSET_WIDTH-1:2], 2'b0} :
+                         ( paddr_is_nc  & mem_data_req_o ) ? {{ICACHE_OFFSET_WIDTH-1{1'b0}},cl_offset_q[2]}<<2 : // needed since we transfer 32bit over a 64bit AXI bus in this case
                                                              cl_offset_q;
     // request word address instead of cl address in case of NC access
     assign mem_data_o.paddr = (paddr_is_nc) ? {cl_tag_d, vaddr_q[ICACHE_INDEX_WIDTH-1:3], 3'b0} :                                         // align to 64bit

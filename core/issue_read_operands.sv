@@ -220,7 +220,7 @@ module issue_read_operands import ariane_pkg::*; #(
         // for FP operations, the imm field can also be the third operand from the regfile
         if (CVA6Cfg.NrRgprPorts == 3) begin
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} :
-                                                    issue_instr_i.op == OFFLOAD ? operand_c_regfile : issue_instr_i.result;
+                                                    issue_instr_i.op == OFFLOAD ? {{riscv::XLEN-1{1'b0}},operand_c_regfile} : issue_instr_i.result;
         end else begin
             imm_n  = is_imm_fpr_cfg(issue_instr_i.op, CVA6Cfg.FpPresent) ? {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, operand_c_regfile} : issue_instr_i.result;
         end
@@ -237,7 +237,7 @@ module issue_read_operands import ariane_pkg::*; #(
         end
 
         if (forward_rs3) begin
-            imm_n  = CVA6Cfg.NrRgprPorts == 3 ? rs3_i : {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, rs3_i};;
+            imm_n  = CVA6Cfg.NrRgprPorts == 3 ? {{riscv::XLEN-1{1'b0}},rs3_i} : {{riscv::XLEN-CVA6Cfg.FLen{1'b0}}, rs3_i};;
         end
 
         // use the PC as operand a
@@ -406,7 +406,7 @@ module issue_read_operands import ariane_pkg::*; #(
     logic [CVA6Cfg.NrCommitPorts-1:0][4:0]  waddr_pack;
     logic [CVA6Cfg.NrCommitPorts-1:0][riscv::XLEN-1:0] wdata_pack;
     logic [CVA6Cfg.NrCommitPorts-1:0]       we_pack;
-    assign raddr_pack = CVA6Cfg.NrRgprPorts == 3 ? {issue_instr_i.result[4:0], issue_instr_i.rs2[4:0], issue_instr_i.rs1[4:0]}
+    assign raddr_pack = CVA6Cfg.NrRgprPorts == 3 ? {{riscv::XLEN/32-1{issue_instr_i.result[4:0]}}, issue_instr_i.rs2[4:0], issue_instr_i.rs1[4:0]}
                                            : {issue_instr_i.rs2[4:0], issue_instr_i.rs1[4:0]};
     for (genvar i = 0; i < CVA6Cfg.NrCommitPorts; i++) begin : gen_write_back_port
         assign waddr_pack[i] = waddr_i[i];
